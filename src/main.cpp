@@ -66,7 +66,6 @@
 #define SMS_NO_LOCATION                          3
 
 unsigned long previousTime = 0;
-double curr_gps_latitude, curr_gps_longitude;
 
 SoftwareSerial SIM800L(SIM800L_TX, SIM800L_RX);
 SoftwareSerial NEO6M(NEO6M_TX, NEO6M_RX);
@@ -104,7 +103,8 @@ void sim800l_sendSMS(uint8_t i){
   delay(100);
 
   if(i == SMS_DEVICE_READY){
-    SIM800L.println("Tracker is connected to network and obtained location for GPS and now ready for operation.");
+    SIM800L.print("Tracker is connected to network and obtained location for GPS and now ready for operation.");
+    SIM800L.println("\n - SMS GPS Tracker");
   }
   
   else if(i == SMS_SEND_COORDINATES){
@@ -119,9 +119,9 @@ void sim800l_sendSMS(uint8_t i){
     #ifndef SMS_GPS_OUTPUT_HYPERLINK
       //Send raw GPS data
       SIM800L.print("Current Location: \n");
-      SIM800L.print(curr_gps_latitude);
-      SIM800L.print(",\n");
-      SIM800L.print(curr_gps_longitude);
+      SIM800L.print(GPS.location.lat(),7);
+      SIM800L.print(',');
+      SIM800L.print(GPS.location.lng(),7);
     #endif
   }
  
@@ -130,7 +130,6 @@ void sim800l_sendSMS(uint8_t i){
   }
 
   delay(100);
-  SIM800L.print("\n - SMS GPS Tracker");
   SIM800L.write(26);
   SIM800L.println();
   delay(1500);
@@ -151,12 +150,7 @@ void setup() {
 
 void loop() {
   while(NEO6M.available() > 0){
-    if(GPS.encode(NEO6M.read())){
-      /*if(GPS.location.isValid()){
-        curr_gps_latitude = GPS.location.lat();
-        curr_gps_longitude = GPS.location.lng();
-      }*/   
-    }
+    if(GPS.encode(NEO6M.read()));
   }
 
   if(isTime(SEND_LOCATION_INTERVALTIME * 1000)){
